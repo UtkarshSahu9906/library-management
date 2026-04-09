@@ -24,5 +24,6 @@ func addBook(w http.ResponseWriter, r *http.Request) {
 	books = append(books, book)
 
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(book)
 }
