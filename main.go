@@ -15,8 +15,9 @@ func main() {
 		fmt.Fprintln(w, "Welcome to Library Management System")
 	})
 
-	port := ":8080"
+	mux.HandleFunc("/books", getAllBooks)
 
+	port := ":8080"
 	log.Println("Server starting on port", port)
 	err := http.ListenAndServe(port, mux)
 	if err != nil {
