@@ -15,8 +15,10 @@ func main() {
 		fmt.Fprintln(w, "Welcome to Library Management System")
 	})
 
-	log.Println("Server starting on port 9090...")
-	err := http.ListenAndServe(":9090", mux)
+	port := ":8080"
+
+	log.Println("Server starting on port", port)
+	err := http.ListenAndServe(port, mux)
 	if err != nil {
 		log.Fatal("Server failed to start: ", err)
 	}
