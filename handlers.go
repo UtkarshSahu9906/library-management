@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// borrowBook handles POST /borrow
 func borrowBook(w http.ResponseWriter, r *http.Request) {
 	var request struct {
 		BookID   string `json:"book_id"`
@@ -18,6 +19,8 @@ func borrowBook(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
+
+	// find the book
 	bookIndex := -1
 	for i, b := range books {
 		if b.ID == request.BookID {
@@ -26,18 +29,20 @@ func borrowBook(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// book not found
 	if bookIndex == -1 {
 		http.Error(w, "Book not found", http.StatusNotFound)
 		return
 	}
 
+	// book already borrowed
 	if !books[bookIndex].Available {
-		http.Error(w, "Book is not available", http.StatusConflict)
+		http.Error(w, "Book is not available", http.StatusBadRequest)
 		return
 	}
 
+	// find the member
 	memberFound := false
-
 	for _, m := range members {
 		if m.ID == request.MemberID {
 			memberFound = true
@@ -45,15 +50,19 @@ func borrowBook(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// member not found
 	if !memberFound {
 		http.Error(w, "Member not found", http.StatusNotFound)
 		return
 	}
 
+	// mark book as unavailable
 	books[bookIndex].Available = false
 
+	// create borrow record
 	borrowDate := time.Now()
-	dueDate := borrowDate.AddDate(0, 0, 14)
+	dueDate := calculateDueDate(borrowDate)
+
 	record := BorrowRecord{
 		ID:         fmt.Sprintf("BR%d", len(borrowRecords)+1),
 		BookID:     request.BookID,
@@ -70,7 +79,6 @@ func borrowBook(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(record)
-
 }
 
 // getAllBooks handles GET /books
