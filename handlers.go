@@ -4,8 +4,28 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 )
+
+func getBorrowRecord(w http.ResponseWriter, r *http.Request) {
+	id := strings.TrimPrefix(r.URL.Path, "/borrow/")
+
+	if id == "" {
+		http.Error(w, "Borrow ID is required", http.StatusBadRequest)
+		return
+	}
+	for _, record := range borrowRecords {
+		if record.ID == id {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(record)
+			return
+		}
+
+	}
+
+	http.Error(w, "Borrow record not found", http.StatusNotFound)
+}
 
 // borrowBook handles POST /borrow
 func borrowBook(w http.ResponseWriter, r *http.Request) {
