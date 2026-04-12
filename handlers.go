@@ -11,7 +11,54 @@ import (
 
 
 
+// getMemberFine handles GET /fine/{memberID}
+// returns total fine for a member
+func getMemberFine(w http.ResponseWriter, r *http.Request) {
+	memberID := strings.TrimPrefix(r.URL.Path, "/fine/")
 
+	if memberID == "" {
+		http.Error(w, "Member ID is required", http.StatusBadRequest)
+		return
+	}
+
+	// check member exists
+	memberFound := false
+	for _, m := range members {
+		if m.ID == memberID {
+			memberFound = true
+			break
+		}
+	}
+
+	if !memberFound {
+		http.Error(w, "Member not found", http.StatusNotFound)
+		return
+	}
+
+	// add up all fines for this member
+	totalFine := 0.0
+	var memberRecords []BorrowRecord
+	for _, record := range borrowRecords {
+		if record.MemberID == memberID {
+			totalFine += record.Fine
+			memberRecords = append(memberRecords, record)
+		}
+	}
+
+	// build response
+	response := struct {
+		MemberID    string         `json:"member_id"`
+		TotalFine   float64        `json:"total_fine"`
+		Records     []BorrowRecord `json:"records"`
+	}{
+		MemberID:  memberID,
+		TotalFine: totalFine,
+		Records:   memberRecords,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
 // returnBook handles POST /return
 // marks a book as returned
 func returnBook(w http.ResponseWriter, r *http.Request) {
@@ -54,7 +101,7 @@ func returnBook(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	
+
 returnDate := time.Now().Format("2006-01-02")
 borrowRecords[recordIndex].Returned = true
 borrowRecords[recordIndex].ReturnDate = returnDate
