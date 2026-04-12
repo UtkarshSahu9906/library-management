@@ -15,6 +15,15 @@ func main() {
 		fmt.Fprintln(w, "Welcome to Library Management System")
 	})
 
+	mux.HandleFunc("/return", func(w http.ResponseWriter, r *http.Request) {
+    switch r.Method {
+    case http.MethodPost:
+        returnBook(w, r)
+    default:
+        http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+    }
+})
+
 	mux.HandleFunc("/books", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodGet:

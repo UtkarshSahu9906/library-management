@@ -8,6 +8,56 @@ import (
 	"time"
 )
 
+// returnBook handles POST /return
+// marks a book as returned
+func returnBook(w http.ResponseWriter, r *http.Request) {
+	var request struct {
+		BorrowID string `json:"borrow_id"`
+	}
+
+	err := json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	// find the borrow record
+	recordIndex := -1
+	for i, record := range borrowRecords {
+		if record.ID == request.BorrowID {
+			recordIndex = i
+			break
+		}
+	}
+
+	// record not found
+	if recordIndex == -1 {
+		http.Error(w, "Borrow record not found", http.StatusNotFound)
+		return
+	}
+
+	// already returned
+	if borrowRecords[recordIndex].Returned {
+		http.Error(w, "Book already returned", http.StatusBadRequest)
+		return
+	}
+
+	// mark book as available again
+	for i, b := range books {
+		if b.ID == borrowRecords[recordIndex].BookID {
+			books[i].Available = true
+			break
+		}
+	}
+
+	// update borrow record
+	borrowRecords[recordIndex].Returned = true
+	borrowRecords[recordIndex].ReturnDate = time.Now().Format("2006-01-02")
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(borrowRecords[recordIndex])
+}
+
 func getBorrowRecord(w http.ResponseWriter, r *http.Request) {
 	id := strings.TrimPrefix(r.URL.Path, "/borrow/")
 
