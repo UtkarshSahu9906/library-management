@@ -8,6 +8,10 @@ import (
 	"time"
 )
 
+
+
+
+
 // returnBook handles POST /return
 // marks a book as returned
 func returnBook(w http.ResponseWriter, r *http.Request) {
@@ -50,9 +54,14 @@ func returnBook(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// update borrow record
-	borrowRecords[recordIndex].Returned = true
-	borrowRecords[recordIndex].ReturnDate = time.Now().Format("2006-01-02")
+	
+returnDate := time.Now().Format("2006-01-02")
+borrowRecords[recordIndex].Returned = true
+borrowRecords[recordIndex].ReturnDate = returnDate
+borrowRecords[recordIndex].Fine = calculateFine(
+    borrowRecords[recordIndex].DueDate,
+    returnDate,
+)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(borrowRecords[recordIndex])
