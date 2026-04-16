@@ -23,6 +23,12 @@ func addBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// validate book fields
+	if errMsg := validateBook(book); errMsg != "" {
+		writeError(w, http.StatusBadRequest, errMsg)
+		return
+	}
+
 	books = append(books, book)
 	writeJSON(w, http.StatusCreated, book)
 }
