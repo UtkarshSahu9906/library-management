@@ -56,3 +56,21 @@ func validateBook(book Book) string {
 	}
 	return ""
 }
+// validateBorrowRequest checks if borrow request has required fields
+func validateBorrowRequest(bookID string, memberID string) string {
+	if bookID == "" {
+		return "book_id is required"
+	}
+	if memberID == "" {
+		return "member_id is required"
+	}
+	return ""
+}
+
+// validateReturnRequest checks if return request has required fields
+func validateReturnRequest(borrowID string) string {
+	if borrowID == "" {
+		return "borrow_id is required"
+	}
+	return ""
+}

@@ -46,6 +46,12 @@ func borrowBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// validate request fields
+	if errMsg := validateBorrowRequest(request.BookID, request.MemberID); errMsg != "" {
+		writeError(w, http.StatusBadRequest, errMsg)
+		return
+	}
+
 	// find the book
 	bookIndex := -1
 	for i, b := range books {
@@ -129,6 +135,12 @@ func returnBook(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
 		writeError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	// validate request fields
+	if errMsg := validateReturnRequest(request.BorrowID); errMsg != "" {
+		writeError(w, http.StatusBadRequest, errMsg)
 		return
 	}
 
