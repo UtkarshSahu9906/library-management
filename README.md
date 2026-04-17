@@ -1,5 +1,4 @@
-markdown# 
-Library Management System
+# Library Management System
 
 A REST API built with Go to manage a library's books, members, borrowing, returns, and fine calculations.
 
